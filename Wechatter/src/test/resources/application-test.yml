@@ -1,9 +1,3 @@
 spring:
-  ai:
-    openai:
-      api-key: ${DEEPSEEK_API_KEY:sk-test-placeholder-for-integration-test}
-
-test:
-  wechat:
-    # 测试目标用户的 openId，通过环境变量 TEST_WECHAT_OPEN_ID 或系统属性传入
-    open-id: ${TEST_WECHAT_OPEN_ID:}
+  datasource:
+    url: jdbc:h2:mem:wechatter;DB_CLOSE_DELAY=-1

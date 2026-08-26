@@ -35,7 +35,7 @@ AI 服务使用 DeepSeek API，环境变量 `DEEPSEEK_API_KEY` 可覆盖 applica
 ## 项目结构
 
 ```
-src/main/java/van/codes/project/wechatter/
+src/main/java/van/project/wechatter/
 ├── WechatterApplication.java         入口（启用 Feign、MapperScan、Scheduling）
 ├── controller/
 │   └── WeChatController.java         GET /wechat（验证）、POST /wechat（接收消息）
