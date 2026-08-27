@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import van.project.wechatter.aitool.CommonTools;
 import van.project.wechatter.aitool.ManageFinancesTools;
 import van.project.wechatter.aitool.ReminderTools;
+import van.project.wechatter.aitool.SearchTool;
 
 @Configuration
 public class AIConfig {
@@ -34,9 +35,10 @@ public class AIConfig {
     }
 
     @Bean
-    public ToolCallbackProvider toolCallbackProvider(ReminderTools reminderTools, CommonTools commonTools, ManageFinancesTools manageFinancesTools) {
+    public ToolCallbackProvider toolCallbackProvider(ReminderTools reminderTools, CommonTools commonTools,
+                                                     ManageFinancesTools manageFinancesTools, SearchTool searchTool) {
         return MethodToolCallbackProvider.builder()
-                .toolObjects(reminderTools, commonTools, manageFinancesTools)
+                .toolObjects(reminderTools, commonTools, manageFinancesTools, searchTool)
                 .build();
     }
 }

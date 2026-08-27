@@ -19,9 +19,9 @@ import java.util.Map;
 @Slf4j
 public class ManageFinancesTools {
 
-    @Value("${APIHZ_ID:}")
+    @Value("${wechatter.apihz.id:}")
     private String apihz_id;
-    @Value("${APIHZ_KEY:}")
+    @Value("${wechatter.apihz.key:}")
     private String apihz_key;
 
     private final RestTemplate restTemplate;

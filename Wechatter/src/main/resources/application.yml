@@ -5,6 +5,12 @@ wechatter:
   wechat:
     host: http://host:port
     notify-template-id: bnDl2Gnssulz21Opa1zPawCJi6S5WDF91k6F8E-DZKE
+  apihz:
+    id: ${APIHZ_ID}
+    key: ${APIHZ_KEY}
+  searxng:
+    # SearXNG 聚合搜索服务地址（实例的 search.formats 中需开启 json 格式）
+    host: http://localhost:9999
 
 spring:
   ai:
@@ -13,18 +19,18 @@ spring:
       chat:
         options:
           model: deepseek-v4-flash
-    mcp:
-      server:
-        name: Wechatter-Reminder-MCP-Server
-        version: 1.0.0
-        type: SYNC
-        instructions: "提供提醒管理工具：新增提醒、查询提醒、取消提醒、获取当前时间。供第三方客户端通过 MCP 协议调用。"
-        protocol: STREAMABLE
+#    mcp:
+#      server:
+#        name: Wechatter-Reminder-MCP-Server
+#        version: 1.0.0
+#        type: SYNC
+#        instructions: "提供提醒管理工具：新增提醒、查询提醒、取消提醒、获取当前时间。供第三方客户端通过 MCP 协议调用。"
+#        protocol: STREAMABLE
   datasource:
     url: jdbc:h2:file:./data/wechatter;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
-    password: 
+    password:
   sql:
     init:
       mode: always
@@ -42,6 +48,8 @@ wechat-public:
     app-secret: ${WECHAT_SECRET:}
     # 服务器配置的 Token（通过命令行或环境变量 WECHAT_TOKEN 注入）
     token: ${WECHAT_TOKEN:}
+    # 公众号自身 OPEN_ID
+    open-id: ${WECHAT_OPENID}
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

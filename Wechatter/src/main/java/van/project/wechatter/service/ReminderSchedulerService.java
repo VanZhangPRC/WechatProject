@@ -56,7 +56,7 @@ public class ReminderSchedulerService {
                     .builder(context.getBean(ChatModel.class))
                     .defaultToolCallbacks(context.getBean(ToolCallbackProvider.class))
                     .defaultSystem("你是一个协助处理信息的智能助手，是一个子线程处理的一部分，" +
-                            "你需要根据用户的描述，利用目前可以使用 tool 完成获取相关信息，并返回简短的结果，长度不超过500")
+                            "你需要根据用户的描述，利用目前可以使用 tool 完成获取相关信息，并返回结果，长度不超过500")
                     .build();
         }
         return chatClient;
