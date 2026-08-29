@@ -3,14 +3,14 @@ server:
 
 wechatter:
   wechat:
-    host: http://host:port
+    host: http://${SERVER_HOST}
     notify-template-id: bnDl2Gnssulz21Opa1zPawCJi6S5WDF91k6F8E-DZKE
   apihz:
     id: ${APIHZ_ID}
     key: ${APIHZ_KEY}
   searxng:
     # SearXNG 聚合搜索服务地址（实例的 search.formats 中需开启 json 格式）
-    host: http://localhost:9999
+    host: http://${SEARXNG_HOST}
 
 spring:
   ai:
@@ -27,7 +27,7 @@ spring:
 #        instructions: "提供提醒管理工具：新增提醒、查询提醒、取消提醒、获取当前时间。供第三方客户端通过 MCP 协议调用。"
 #        protocol: STREAMABLE
   datasource:
-    url: jdbc:h2:file:./data/wechatter;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
+    url: jdbc:h2:file:./data/data/wechatter;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -60,11 +60,5 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 logging:
-  level:
-    org.springframework.ai.chat.client.advisor: DEBUG
-    okhttp3: DEBUG
-    reactor.netty.http.client: DEBUG
-    van.project.wechat.wechatPublic.services.WechatApiExecutor: DEBUG
-    van.project.wechatter.util.van.project.wechatter.util.MarkdownUtil: DEBUG
   file:
-    name: ./logs/wechatter.log
+    name: ./data/logs/wechatter.log
