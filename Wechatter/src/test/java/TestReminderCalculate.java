@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestReminderCalculate {
 
 
-    private ReminderSchedulerService reminderSchedulerService = new ReminderSchedulerService(null, null, null, null);
+    private ReminderSchedulerService reminderSchedulerService = new ReminderSchedulerService(null, null, null, null, null);
 
     @Test
     @DisplayName("测试每周执行的日期计算逻辑")

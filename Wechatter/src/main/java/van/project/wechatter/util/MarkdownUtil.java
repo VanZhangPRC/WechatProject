@@ -1,6 +1,7 @@
 package van.project.wechatter.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.commonmark.Extension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.node.Node;
@@ -8,9 +9,13 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.springframework.util.StringUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 @Slf4j
 public class MarkdownUtil {
@@ -35,24 +40,20 @@ public class MarkdownUtil {
             return "<p>空内容</p>";
         }
 
-        // 1. 补齐 Base64 填充位（URL-safe 去掉了 '='）
-        String base64 = encoded
-                .replace('-', '+')
-                .replace('_', '/');
-        int mod = base64.length() % 4;
-        if (mod == 2) base64 += "==";
-        else if (mod == 3) base64 += "=";
-        else if (mod == 1) {
-            // 理论上不会出现，但防御处理
-            throw new IllegalArgumentException("Invalid Base64 format");
+        // 1. 解码
+        byte[] decodedBytes = Base64.getUrlDecoder().decode(encoded);
+
+        // 2. GZIP解压缩
+        String markdown;
+        try (GZIPInputStream inputStream = new GZIPInputStream(new ByteArrayInputStream(decodedBytes))) {
+            markdown = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            log.error("GZIP解压缩markdown内容失败", e);
+            throw new RuntimeException(e);
         }
 
-        // 2. 解码
-        byte[] decodedBytes = Base64.getDecoder().decode(base64);
-        String markdown = new String(decodedBytes, StandardCharsets.UTF_8);
-        log.debug("markdown: {}", markdown);
-
         // 3. Markdown 转 HTML
+        log.debug("markdown: {}", markdown);
         Node document = parser.parse(markdown);
 
         String htmlBody = renderer.render(document);
@@ -64,9 +65,16 @@ public class MarkdownUtil {
         if (content == null || content.isEmpty())
             return "";
 
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(out)) {
+            gzipOutputStream.write(content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            log.error("编码markdown内容错误", e);
+            throw new RuntimeException(e);
+        }
         return Base64
                 .getUrlEncoder()
                 .withoutPadding()
-                .encodeToString(content.getBytes(StandardCharsets.UTF_8));
+                .encodeToString(out.toByteArray());
     }
 }

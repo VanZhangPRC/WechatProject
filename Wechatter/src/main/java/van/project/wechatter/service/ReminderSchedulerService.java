@@ -1,23 +1,22 @@
 package van.project.wechatter.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallbackProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Service;
+import van.project.wechat.wechatPublic.services.WechatApiExecutor;
+import van.project.wechat.wechatPublic.services.api.TemplateMessageSendReq;
 import van.project.wechatter.entity.Reminder;
 import van.project.wechatter.entity.enums.ReminderStatus;
 import van.project.wechatter.mapper.ReminderMapper;
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.stereotype.Service;
-import van.project.wechatter.util.MarkdownUtil;
-import van.project.wechat.wechatPublic.services.WechatApiExecutor;
-import van.project.wechat.wechatPublic.services.api.TemplateMessageSendReq;
+import van.project.wechatter.wechat.WechatHelper;
 
 import java.time.*;
 import java.util.Collections;
@@ -37,10 +36,7 @@ public class ReminderSchedulerService {
     private final ReminderMapper reminderMapper;
     private final WechatApiExecutor wechatApiExecutor;
     private final ApplicationContext context;
-    @Value("${wechatter.wechat.notify-template-id:bnDl2Gnssulz21Opa1zPawCJi6S5WDF91k6F8E-DZKE}")
-    private String TEMPLATE_ID;
-    @Value("${wechatter.wechat.host}")
-    private String HOST;
+    private final WechatHelper wechatHelper;
 
     private ChatClient chatClient;
     private final Object chatClientLock = new Object();
@@ -152,21 +148,21 @@ public class ReminderSchedulerService {
         String content = r.getContent();
         if (r.isAiAssisted()) {
             AIAssistedResult assistedResult = getChatClient().prompt()
-                    .system(s -> s.text("当前用户openId[`{openId}`]").param("openId", r.getOpenId()))
+                    .system(s -> s.text("根据要求处理并获得用户需要的数据，我会将结果发送给用户，当前用户openId[`{openId}`]").param("openId", r.getOpenId()))
                     .user(content)
                     .call()
                     .responseEntity(AIAssistedResult.class)
                     .entity();
+            wechatApiExecutor.sendTemplateMessage(wechatHelper.buildNotifyTemplateMessage(r.getOpenId(), assistedResult.title, assistedResult.getContent()));
+        } else {
             wechatApiExecutor.sendTemplateMessage(
                     TemplateMessageSendReq
                             .builder()
                             .touser(r.getOpenId())
-                            .template_id(TEMPLATE_ID)
-                            .data(Collections.singletonMap("content", new TemplateMessageSendReq.DataElement(assistedResult.title)))
-                            .url(HOST + "/markdown/view?data=" + MarkdownUtil.encode(assistedResult.content))
-                            .build());
-        } else {
-            wechatApiExecutor.sendTemplateMessage(r.getOpenId(), TEMPLATE_ID, Collections.singletonMap("content", new TemplateMessageSendReq.DataElement(r.getContent())));
+                            .template_id(wechatHelper.getNotifyTemplateId())
+                            .data(Collections.singletonMap("content", new TemplateMessageSendReq.DataElement(content)))
+                            .build()
+            );
         }
 
         LocalDateTime next = calcNextTrigger(r);

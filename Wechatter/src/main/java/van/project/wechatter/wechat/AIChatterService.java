@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import van.project.wechat.wechatPublic.services.WechatApiExecutor;
+import van.project.wechat.wechatPublic.services.api.TemplateMessageSendReq;
 import van.project.wechat.wechatPublic.services.messages.receive.TextMessage;
 import van.project.wechat.wechatPublic.services.messages.resp.ResponseTextMessage;
 
@@ -19,6 +22,8 @@ import java.util.concurrent.*;
 public class AIChatterService {
 
     private final ChatClient chatClient;
+    private final WechatApiExecutor wechatApiExecutor;
+    private final WechatHelper wechatHelper;
 
     // 长时间消息处理过程
     private final ConcurrentHashMap<Long, CompletableFuture<String>> processMap = new ConcurrentHashMap<>();
@@ -34,7 +39,7 @@ public class AIChatterService {
 
         CompletableFuture<String> future = tryAquire(msgId, message);
         try {
-            String s = future.get(14, TimeUnit.SECONDS);
+            String s = future.get(6, TimeUnit.SECONDS);
             return ResponseTextMessage.builder(message).content(s).build();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -57,12 +62,18 @@ public class AIChatterService {
                 return completedMap.get(msgId);
             } else {
                 newFuture
-                        .completeAsync(() ->
-                                chatClient.prompt()
-                                        .user(u -> u.param("openId", message.getFromUserName()).text("用户[openId:`{openId}`]：" + message.getContent()))
-                                        .advisors(o -> o.param(ChatMemory.CONVERSATION_ID, message.getFromUserName()))
-                                        .call()
-                                        .content())
+                        .completeAsync(() -> {
+                            long time = System.currentTimeMillis();
+                            String content = chatClient.prompt()
+                                    .user(u -> u.param("openId", message.getFromUserName()).text("用户[openId:`{openId}`]：" + message.getContent()))
+                                    .advisors(o -> o.param(ChatMemory.CONVERSATION_ID, message.getFromUserName()))
+                                    .call()
+                                    .content();
+                            if (System.currentTimeMillis() - time > 15_000L) {
+                                wechatApiExecutor.sendTemplateMessage(wechatHelper.buildNotifyTemplateMessage(message.getFromUserName(), "回复"+message.getContent(), content));
+                            }
+                            return content;
+                        })
                         .thenRunAsync(() -> {
                             completedMap.put(msgId, newFuture);
                             processMap.remove(msgId);
