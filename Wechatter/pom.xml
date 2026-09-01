@@ -94,7 +94,7 @@
         <dependency>
             <groupId>com.github.VanZhangPRC</groupId>
             <artifactId>WechatPublic</artifactId>
-            <version>main-SNAPSHOT</version>
+            <version>v0.0.1</version>
         </dependency>
 
         <!-- Markdown 解析器（CommonMark 轻量且标准） -->

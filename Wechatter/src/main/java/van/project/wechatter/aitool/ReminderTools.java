@@ -82,12 +82,12 @@ public class ReminderTools {
         return "提醒已新增，ID=" + reminder.getId();
     }
 
-    @Tool(name = "listScheduledInfo", description = "查询某个用户目前执行中的定时提醒任务，返回提醒内容和下次执行时间")
+    @Tool(name = "listScheduledInfo", description = "查询某个用户目前执行中的定时提醒任务，返回ID、提醒内容和下次执行时间")
     public List<String[]> listScheduledInfo(@ToolParam(description = "用户标识openId") String openId) {
         Map<Reminder, LocalDateTime> scheduledInfo = reminderSchedulerService.getScheduledInfo(openId);
         List<String[]> result = new ArrayList<>();
         for (Map.Entry<Reminder, LocalDateTime> entry : scheduledInfo.entrySet()) {
-            result.add(new String[]{entry.getKey().getContent(), entry.getValue().toString()});
+            result.add(new String[]{entry.getKey().getId().toString(), entry.getKey().getContent(), entry.getValue().toString()});
         }
         return result;
     }
