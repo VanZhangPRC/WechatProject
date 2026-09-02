@@ -11,6 +11,7 @@ import van.project.wechatter.entity.enums.ReminderType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -19,7 +20,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = WechatterApplication.class,  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.profiles.active=test")
+@SpringBootTest(classes = WechatterApplication.class,  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.profiles.active=default")
 public class TestToolCalling {
 
     @Autowired
@@ -69,13 +70,14 @@ public class TestToolCalling {
     @Test
     @DisplayName("测试获取定时任务信息")
     public void testReminderToolsListScheduledInfo() {
+        LocalDateTime now = LocalDateTime.now().plusHours(1);
         reminderTools.addReminder(
                 OPENID,
                 "定时执行测试",
                 ReminderType.SPECIFIC_DATE,
-                LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE),
+                now.format(DateTimeFormatter.ISO_LOCAL_DATE),
                 null, null, null,
-                LocalTime.now().plusHours(1).format(DateTimeFormatter.ofPattern("HH:mm")),
+                now.format(DateTimeFormatter.ofPattern("HH:mm")),
                 false);
 
         List<String[]> strings = reminderTools.listScheduledInfo(OPENID);
