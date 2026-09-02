@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.TaskScheduler;
@@ -50,9 +51,18 @@ public class ReminderSchedulerService {
 
             chatClient = ChatClient
                     .builder(context.getBean(ChatModel.class))
+                    .defaultOptions(ChatOptions.builder().temperature(0.8).build())
                     .defaultToolCallbacks(context.getBean(ToolCallbackProvider.class))
-                    .defaultSystem("你是一个协助处理信息的智能助手，是一个子线程处理的一部分，" +
-                            "你需要根据用户的描述，利用目前可以使用 tool 完成获取相关信息，并返回结果，长度不超过500")
+                    .defaultSystem("""
+                            你是一个处理信息的智能子进程，负责获取数据并返回。
+                            你的父级进程是一个智能助理，负责定时执行任务并将结果推送给用户：
+                            1. 达到执行时间点
+                            2. 执行任务，比如获取相关数据等
+                            3. 将结果推送给用户
+                            其中，2点是你需要协助父级进程完成的工作，比如利用工具获取信息并返回，
+                            注意：上述步骤中你位于2点的位置，3点将结果推送给用户由父级进程完成，你不应该把
+                            你需要根据用户的描述，利用目前可以使用 tool 完成获取、整理相关信息，结论长度不超过1000
+                            """)
                     .build();
         }
         return chatClient;
@@ -148,7 +158,7 @@ public class ReminderSchedulerService {
         String content = r.getContent();
         if (r.isAiAssisted()) {
             AIAssistedResult assistedResult = getChatClient().prompt()
-                    .system(s -> s.text("根据要求处理并获得用户需要的数据，我会将结果发送给用户，当前用户openId[`{openId}`]").param("openId", r.getOpenId()))
+                    .system(s -> s.text("当前用户openId[`{openId}`]").param("openId", r.getOpenId()))
                     .user(content)
                     .call()
                     .responseEntity(AIAssistedResult.class)

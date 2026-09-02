@@ -31,19 +31,22 @@ public class ReminderTools {
     private final ReminderSchedulerService reminderSchedulerService;
 
     @Tool(name = "addReminder", description = """
-            # 新增一个提醒记录。\n
-            ## 提醒类型有：\n
-            SPECIFIC_DATE(指定日期) - 指定某一天的某个时分进行通知，需填 targetDate\n
-            MONTHLY_DAY(每月几号) - 每月几号的某个时分进行通知，需填 dayOfMonth\n
-            MONTHLY_LAST_N_DAYS(每月倒数几天) - 每月倒数几天的某个时分进行通知，需填 lastDayOfMonth\n
-            EVERY_DAY(每天执行)\n
-            EVERY_WEEK(每周执行) - 每周哪一天执行，需要填 dayOfWeek，传入数字代表周几(1-Monday周一，2-Tuesday周二，3-Wednesday周三，4-Thursday周四，5-Friday周五，6-Saturday周六，7-Sunday周日)。\n
-            \n
-            ## 是否需要AI辅助的判断：\n
+            # 新增一个提醒记录
+            ## 提醒类型有：
+            SPECIFIC_DATE(指定日期) - 指定某一天的某个时分进行通知，需填 targetDate
+            MONTHLY_DAY(每月几号) - 每月几号的某个时分进行通知，需填 dayOfMonth
+            MONTHLY_LAST_N_DAYS(每月倒数几天) - 每月倒数几天的某个时分进行通知，需填 lastDayOfMonth
+            EVERY_DAY(每天执行)
+            EVERY_WEEK(每周执行) - 每周哪一天执行，需要填 dayOfWeek，传入数字代表周几(1-Monday周一，2-Tuesday周二，3-Wednesday周三，4-Thursday周四，5-Friday周五，6-Saturday周六，7-Sunday周日)。
+            
+            ## 是否需要AI辅助的判断：
             根据提醒/待办事项的内容判断是否需要AI辅助，
             如果内容只是普通、固定的文本信息则不需要(如，提醒用户某个时间做某件事)；
-            如果内容不是普通、固定的文本信息，根据现有工具判断能否后续由工具辅助大模型完成(如，每天查询黄金价格并告知用户)，
-            如果可以根据现有工具辅助完成，则将 content 内容填写为可以用于指导大模型完成相关信息采集处理的、指令明确的 skill 描述，skill内容长度不超过900，
+            如果内容不是普通、固定的文本信息，根据现有工具判断能否后续由工具辅助大模型完成(如，每天查询黄金价格)，
+            如果可以根据现有工具辅助完成，则将 content 内容填写为可以用于指导大模型的 skill 描述:
+            1. skill 内容为指导LLM完成数据采集的工作，注意skill描述LLM完成工作的边界，LLM辅助完成如获取数据结果等任务，推送的工作是后置的处理逻辑完成
+            2. skill 内容用于指导LLM完成工作，比如如何调用tool-calling获取数据、执行步骤等
+            3. skill 内容长度不超过900，
             如果现有工具辅助不足够协助大模型完成用户的需要，则礼貌回复无法处理。
             """)
     public String addReminder(

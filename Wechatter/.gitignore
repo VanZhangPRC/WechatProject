@@ -1,6 +1,7 @@
 logs/
 data/
 *.tar
+*.log
 
 target/
 !.mvn/wrapper/maven-wrapper.jar
