@@ -1,0 +1,72 @@
+name: wechatter
+networks:
+  wechatter-networks:
+services:
+  searxng:
+    container_name: searxng
+    image: searxng/searxng:2026.9.2-05cd77f71
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - 18080:8080
+    volumes:
+      - /workspace/searxng/config/:/etc/searxng/
+      - /workspace/searxng/data/:/var/cache/searxng/
+    restart: unless-stopped
+    networks:
+      - wechatter-networks
+    deploy:
+      resources:
+        limits:
+          memory: 255m
+  mysql:
+    image: mysql:8.4.11
+    container_name: mysql
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_DATABASE: wechatter
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: wechatter
+      MYSQL_PASSWORD: wechatter
+    ports:
+      - "3306:3306"
+    volumes:
+      - /workspace/mysql/data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - wechatter-networks
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+  wechatter:
+    image: wechatter:v1.0
+    container_name: wechatter
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_HOST: wechatter.zhfan.online
+      APIHZ_ID: ${APIHZ_ID}
+      APIHZ_KEY: ${APIHZ_KEY}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      WECHAT_APP_ID: ${WECHAT_APP_ID}
+      WECHAT_SECRET: ${WECHAT_SECRET}
+      WECHAT_TOKEN: ${WECHAT_TOKEN}
+      WECHAT_OPENID: ${WECHAT_OPENID}
+      SPRING_DATASOURCE_USERNAME: wechatter
+      SPRING_DATASOURCE_PASSWORD: wechatter
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/wechatter?autoReconnect=true&useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+      SEARXNG_HOST: searxng:8080
+    ports:
+      - 80:8080
+    volumes:
+      - /workspace/wechatter/data:/wechatter/data
+    networks:
+      - wechatter-networks
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 255m
+    depends_on:
+      - searxng
+      - mysql
