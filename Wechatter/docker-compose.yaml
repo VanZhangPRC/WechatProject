@@ -42,6 +42,9 @@ services:
   wechatter:
     image: wechatter:v1.0
     container_name: wechatter
+    build:
+      context: .
+      dockerfile: ./Dockerfile
     environment:
       TZ: Asia/Shanghai
       SERVER_HOST: wechatter.zhfan.online
