@@ -27,21 +27,23 @@ spring:
 #        instructions: "提供提醒管理工具：新增提醒、查询提醒、取消提醒、获取当前时间。供第三方客户端通过 MCP 协议调用。"
 #        protocol: STREAMABLE
   datasource:
-    # url: jdbc:h2:file:./data/data/wechatter;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
-    # driver-class-name: org.h2.Driver
-    username: root
-    password: root
-    url: jdbc:mysql://localhost:3306/wechatter?autoReconnect=true&useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:file:./data/data/wechatter;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+#    url: jdbc:mysql://localhost:3306/wechatter?autoReconnect=true&useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+#    driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
       mode: always
       schema-locations:
         - classpath:schema.sql
-#  h2:
-#    console:
-#      enabled: true
-#      path: /h2-console
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
 wechat-public:
   wechat:
     # 公众号 AppID（通过命令行或环境变量 WECHAT_APP_ID 注入）
