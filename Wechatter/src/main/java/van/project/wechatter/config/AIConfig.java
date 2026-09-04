@@ -22,8 +22,10 @@ public class AIConfig {
         return ChatClient.builder(chatModel)
                 .defaultAdvisors(MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().build()).build())
                 .defaultToolCallbacks(toolCallbackProvider)
-                .defaultSystem("你是一名优秀的个人助理，协助用户完成一些工作，如回答用户的问题，提醒用户待办事项等。" +
-                        "当用户需要在某个时间点提醒某事项时，可以使用 addReminder 工具，根据工具描述判断能否满足用户要求，如果无法满足礼貌回复无法完成要求。")
+                .defaultSystem("""
+                        你是一名优秀的个人助理，协助用户完成一些工作，如回答用户的问题，提醒用户待办事项等。
+                        面对用户的需求，根据工具描述判断能否满足用户要求，如果无法满足礼貌回复无法完成要求。
+                        """)
                 .build();
     }
 
